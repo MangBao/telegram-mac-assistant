@@ -1,0 +1,111 @@
+// ~/.openclaw/openclaw.json
+// ─────────────────────────────────────────────────────────────────────────────
+// OpenClaw Configuration Template
+// Source: https://docs.openclaw.ai/gateway/configuration
+//
+// IMPORTANT: This file is a TEMPLATE. Do NOT put real secrets here.
+// Secrets must come from environment variables via ${VAR_NAME} substitution.
+// The rendered config is placed at ~/.openclaw/openclaw.json (machine-local,
+// not tracked by Git). OPENCLAW_CONFIG_PATH must point to it.
+//
+// Per official docs:
+//  - Config lives at ~/.openclaw/openclaw.json (JSON5 format)
+//  - Symlinks are NOT supported; use OPENCLAW_CONFIG_PATH instead
+//  - Unknown keys cause Gateway to refuse to start (strict validation)
+//  - Secrets use ${ENV_VAR} substitution in string values
+// ─────────────────────────────────────────────────────────────────────────────
+
+{
+  // ── Agent workspace ─────────────────────────────────────────────────────
+  // Set to ~/AI-Workspace — NOT the full $HOME directory.
+  // This is the root directory the agent can read/write.
+  agents: {
+    defaults: {
+      workspace: "~/AI-Workspace",
+
+      // READ-only tool policy for Phase 3.
+      // The agent can read files and query system state,
+      // but cannot write, execute, or use browser/UI automation.
+      tools: {
+        deny: [
+          "write",
+          "edit",
+          "delete",
+          "exec",
+          "browser",
+          "screenshot",
+          "accessibility",
+        ],
+      },
+      // Model: set provider/model via env var to avoid hard-coding model names.
+      // Example value: "anthropic/claude-sonnet-4-6"
+      model: {
+        primary: "${OPENCLAW_MODEL_PRIMARY}",
+        // Optional fallback — remove line if not needed
+        // fallbacks: ["${OPENCLAW_MODEL_FALLBACK}"],
+      },
+
+      // Skills: start with none enabled; add explicitly as needed.
+      skills: [],
+
+      // Heartbeat: periodic check-in to owner. Set to "0m" to disable.
+      heartbeat: {
+        every: "0m",
+        target: "owner",
+      },
+    },
+  },
+
+  // ── Gateway server ───────────────────────────────────────────────────────
+  // Port 18789 is the official default.
+  // NEVER expose this port to the public internet.
+  gateway: {
+    port: 18789,
+    // bind is localhost by default — do not change to 0.0.0.0 without a VPN
+  },
+
+  // ── Telegram channel ───────────────────────────────────────────────────
+  // Bot token must come from environment variable — NEVER hard-coded.
+  // Token resolution: TELEGRAM_BOT_TOKEN in ~/.openclaw/.env
+  //
+  // Phase 3 DM policy:
+  //   First-run: dmPolicy: "pairing" → pair once → find user ID →
+  //   Production: dmPolicy: "allowlist" + your numeric user ID in allowFrom.
+  //
+  // No "groups" key → all group chats blocked by default (groupPolicy: "allowlist").
+  channels: {
+    telegram: {
+      enabled: true,
+      botToken: "${TELEGRAM_BOT_TOKEN}",
+
+      // Switch to "allowlist" after completing pairing and getting your user ID.
+      // See docs/telegram-setup.md for the full pairing workflow.
+      dmPolicy: "pairing",
+
+      // After pairing: set dmPolicy: "allowlist" and fill TELEGRAM_OWNER_ID in .env.
+      // allowFrom: ["${TELEGRAM_OWNER_ID}"],
+
+      // Groups: no "groups" key here → all groups blocked (Phase 3 requirement).
+
+      // Streaming: "progress" = show tool status, final answer as normal message.
+      streaming: {
+        mode: "progress",
+      },
+    },
+  },
+
+  // ── Session isolation ───────────────────────────────────────────────────
+  session: {
+    dmScope: "per-channel-peer",
+  },
+
+  // ── Environment variable loading ─────────────────────────────────────────
+  // OpenClaw reads ~/.openclaw/.env automatically.
+  // Add OPENCLAW_MODEL_PRIMARY, TELEGRAM_BOT_TOKEN, provider API keys there.
+  // Do not enable shellEnv unless you understand the security implications.
+  env: {
+    shellEnv: {
+      enabled: false,
+    },
+  },
+}

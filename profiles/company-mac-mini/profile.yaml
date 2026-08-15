@@ -1,0 +1,29 @@
+# Company Mac Mini Profile
+# This configuration is declarative and portable. No secrets here.
+
+profile:
+  name: "company-mac-mini"
+  description: "High-security profile for company-owned AI workstation"
+
+features:
+  browser_automation: true
+  filesystem_access: true
+  terminal_access: true
+  camera_access: false
+  microphone_access: false
+
+coding_agents:
+  primary: "claude-code"
+  fallback: "qwen-code"
+
+permissions:
+  required:
+    - Accessibility
+    - Screen Recording
+  allowed_directories:
+    - "~/AI-Workspace"
+    - "/tmp"
+
+runtime:
+  mode: "strict" # Restrict untrusted skills
+  gateway_port: 18789

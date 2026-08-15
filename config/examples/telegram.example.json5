@@ -1,0 +1,117 @@
+// config/examples/telegram.example.json5
+// ─────────────────────────────────────────────────────────────────────────────
+// Example: Telegram Channel — Single Owner, Strict DM Access
+// Source: https://docs.openclaw.ai/channels/telegram
+//
+// PURPOSE: This is a documentation-only example. Copy relevant sections
+// into your ~/.openclaw/openclaw.json after reviewing.
+//
+// SECRETS: Bot token comes from the TELEGRAM_BOT_TOKEN environment variable.
+// This is injected by OpenClaw via ${VAR} substitution — never hard-coded.
+// The actual token lives in ~/.openclaw/.env (machine-local, not in Git).
+//
+// PHASE 3 SECURITY MODEL:
+//   - dmPolicy: "allowlist"  → only YOUR numeric user ID can interact
+//   - No "groups" key        → all group chats are blocked by default
+//   - Gateway on localhost   → never exposed to internet
+// ─────────────────────────────────────────────────────────────────────────────
+
+{
+  // ── Telegram Channel ──────────────────────────────────────────────────────
+  channels: {
+    telegram: {
+      enabled: true,
+
+      // Bot token via environment variable — NEVER hard-code here.
+      // Set TELEGRAM_BOT_TOKEN in ~/.openclaw/.env
+      botToken: "${TELEGRAM_BOT_TOKEN}",
+
+      // DM Policy: "allowlist" = only users in allowFrom can interact.
+      //
+      // On first setup, use "pairing" to discover your user ID:
+      //   1. Set dmPolicy: "pairing"
+      //   2. Start gateway: openclaw gateway start
+      //   3. DM your bot /start → receive pairing code
+      //   4. Approve: openclaw pairing approve telegram <CODE>
+      //   5. Find your user ID: openclaw logs --follow, then send a DM
+      //   6. Set TELEGRAM_OWNER_ID in ~/.openclaw/.env
+      //   7. Switch to: dmPolicy: "allowlist"
+      dmPolicy: "allowlist",
+
+      // allowFrom: List of authorized numeric Telegram user IDs.
+      // Format: plain numeric string, or with "tg:" / "telegram:" prefix.
+      // Get your ID via: openclaw logs --follow, then send a DM to the bot.
+      //
+      // TELEGRAM_OWNER_ID is set in ~/.openclaw/.env — never in Git.
+      allowFrom: ["${TELEGRAM_OWNER_ID}"],
+
+      // groupPolicy: "allowlist" is the default when no "groups" key exists.
+      // No "groups" key = all groups blocked. This is correct for Phase 3.
+      groupPolicy: "allowlist",
+      // NOTE: Do NOT add a "groups" key here in Phase 3.
+
+      // Streaming: "progress" shows tool status while responding (default).
+      // Sends final answer as a normal message (not streamed into preview).
+      streaming: {
+        mode: "progress",
+      },
+
+      // Heartbeat: disabled in Phase 3.
+      // Enable later with: agents.defaults.heartbeat.every = "30m"
+    },
+  },
+
+  // ── Agent Workspace ───────────────────────────────────────────────────────
+  agents: {
+    defaults: {
+      workspace: "~/AI-Workspace",
+
+      // READ-only tool policy for Phase 3.
+      // "write", "edit", "delete", and "exec" are denied.
+      // The agent can read files and check system status, but cannot modify.
+      tools: {
+        deny: [
+          "write",
+          "edit",
+          "delete",
+          "exec",
+          "browser",
+          "screenshot",
+          "accessibility",
+        ],
+      },
+
+      // Model: set via environment variable in ~/.openclaw/.env
+      model: {
+        primary: "${OPENCLAW_MODEL_PRIMARY}",
+      },
+
+      // Skills: none enabled in Phase 3
+      skills: [],
+
+      // Heartbeat: off in Phase 3
+      heartbeat: {
+        every: "0m",
+      },
+    },
+  },
+
+  // ── Gateway ───────────────────────────────────────────────────────────────
+  gateway: {
+    port: 18789,
+    // bind defaults to 127.0.0.1 — do NOT change without VPN/Tailscale
+  },
+
+  // ── Session Isolation ─────────────────────────────────────────────────────
+  session: {
+    // "per-channel-peer": each Telegram user gets their own isolated session
+    dmScope: "per-channel-peer",
+  },
+
+  // ── Environment ───────────────────────────────────────────────────────────
+  env: {
+    shellEnv: {
+      enabled: false,
+    },
+  },
+}

@@ -141,3 +141,29 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# --- OpenClaw & Mac Assistant specifics ---
+
+# Secrets and Credentials
+credentials/
+tokens/
+secrets/
+*.pem
+*.key
+
+# Browser state
+browser-profiles/
+
+# Runtime state
+runtime/
+openclaw.db*
+*.lock
+
+# OS temporary files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes

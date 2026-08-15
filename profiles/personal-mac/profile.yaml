@@ -1,0 +1,29 @@
+# Personal Mac Profile
+# This configuration is declarative and portable. No secrets here.
+
+profile:
+  name: "personal-mac"
+  description: "Flexible profile for personal AI assistant"
+
+features:
+  browser_automation: true
+  filesystem_access: true
+  terminal_access: true
+  camera_access: true
+  microphone_access: true
+
+coding_agents:
+  primary: "opencode"
+  fallback: "claude-code"
+
+permissions:
+  required:
+    - Accessibility
+    - Screen Recording
+  allowed_directories:
+    - "~/AI-Workspace"
+    - "~/Downloads"
+
+runtime:
+  mode: "flexible" # Allow experimental skills
+  gateway_port: 18789
